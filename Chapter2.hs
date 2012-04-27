@@ -42,8 +42,11 @@ listIndex = consList !! 0 === 1
 listSugar = 1:2:3:[] === [1,2,3]
 
 -- List functions
-listHead   = head basicList === 1
-listTail   = tail basicList === [2,3,4,5]
-listLast   = last basicList === 5
-listInit   = init basicList === [1,2,3,4]
-listLength = length basicList === 5
+listHead    = head [1,2,3,4,5] === 1
+listTail    = tail [1,2,3,4,5] === [2,3,4,5]
+listLast    = last [1,2,3,4,5] === 5
+listInit    = init [1,2,3,4,5] === [1,2,3,4]
+listLength  = length [1,2,3,4,5] === 5
+listNull1   = null [1,2,3,4,5] === False
+listNull2   = null [] === True
+listReverse = reverse [1,2,3,4,5] === [5,4,3,2,1]
