@@ -64,7 +64,7 @@ listElem    = elem 3 [1,2,3,4,5] === True
 listElem2   = (3 `elem` [1,2,3,4,5]) === True
 
 {-
- - RANGES
+ - RANGES & LIST COMPREHENSIONS
  -}
 
 -- Basic ranges and range functions
@@ -93,3 +93,21 @@ funnyNouns = [a ++ " " ++ n | n <- nouns, a <- adjectives]
 length' xs         = sum [1 | _ <- xs]
 removeLowerCase st = [c | c <- st, c `elem` ['A'..'Z']]
 functionTest1      = removeLowerCase "IdontLIKETEA" === "ILIKETEA"
+
+-- Tuples
+testTuple      = (1, 2)
+testFst        = fst (1, 2) === 1
+testSnd        = snd (1, 2) === 2
+testZip        = zip [1..5] [2..6] === [(1, 2), (2, 3), (3, 4), (4, 5), (5, 6)]
+enumerate xs   = zip [1..] xs
+rightTriangles = [
+  (a, b, c) |       -- Make a triangle tuple.
+  c <- [1..10],     -- Sides must be less than 10 and natural numbers.
+  b <- [1..10],
+  a <- [1..10],
+  a + b >= c,       -- Triangle must be closed.  No broken triangles.
+  b + c >= a,
+  c + a >= b,
+  a^2 + b^2 == c^2, -- Must be right triangle.
+  a + b + c == 24   -- Must have perimeter equal to 24.
+  ]
