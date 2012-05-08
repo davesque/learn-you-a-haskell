@@ -33,3 +33,25 @@ testList = [[4,3,2],[1,2],[],[1],[2,5,2,2]]
 testOn   = L.sortBy (compare `F.on` length) testList === [[],[1],[1,2],[4,3,2],[2,5,2,2]]
 testOn'  = L.sortBy compareLength testList === [[],[1],[1,2],[4,3,2],[2,5,2,2]]
     where compareLength = (\x y -> if length x > length y then GT else if length x == length y then EQ else LT)
+
+-- Simulate a map
+phoneBook =
+    [("test", "303-819-6083")
+    ,("test2", "222-222-2222")
+    ,("test3", "333-333-3333")
+    ]
+
+-- Basic find key function
+findKey :: (Eq k) => k -> [(k,v)] -> v
+findKey key map = snd . head . filter (\(k,_) -> key == k) $ map
+
+-- More robust find key function
+findKey' :: (Eq k) => k -> [(k,v)] -> Maybe v
+findKey' _ []           = Nothing
+findKey' key ((k,v):xs) = if key == k
+                          then Just v
+                          else findKey' key xs
+
+-- Find function defined with a fold
+findKey'' :: (Eq k) => k -> [(k,v)] -> Maybe v
+findKey'' key = foldl (\acc (k,v) -> if key == k then Just v else acc) Nothing
