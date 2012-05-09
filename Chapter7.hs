@@ -2,6 +2,7 @@ import Tools
 import qualified Data.List as L
 import qualified Data.Function as F
 import qualified Data.Char as C
+import qualified Data.Map as M
 
 -- Zip an item into a list
 testIntersperse = L.intersperse '.' "MONKEY" === "M.O.N.K.E.Y"
@@ -36,7 +37,7 @@ testOn'  = L.sortBy compareLength testList === [[],[1],[1,2],[4,3,2],[2,5,2,2]]
 
 -- Simulate a map
 phoneBook =
-    [("test", "303-819-6083")
+    [("test1", "111-111-1111")
     ,("test2", "222-222-2222")
     ,("test3", "333-333-3333")
     ]
@@ -55,3 +56,9 @@ findKey' key ((k,v):xs) = if key == k
 -- Find function defined with a fold
 findKey'' :: (Eq k) => k -> [(k,v)] -> Maybe v
 findKey'' key = foldl (\acc (k,v) -> if key == k then Just v else acc) Nothing
+
+-- The proper way to use maps
+testMap    = M.fromList phoneBook
+testInsert = M.insert "test4" "444-444-4444" testMap
+testLookup = M.lookup "test1" testMap === Just "111-111-1111"
+testMember = M.member "test1" testMap === True
