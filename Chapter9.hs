@@ -60,3 +60,8 @@ colorNumbersAction = do
         return color)
     putStrLn "The colors you associate with 1, 2, 3, and 4 are:"
     mapM_ putStrLn colors
+
+funAction = mapM_ print [1..10]
+funAction2 = do
+    forM [1..10] print
+    return ()
