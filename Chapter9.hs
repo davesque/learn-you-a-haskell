@@ -65,3 +65,8 @@ funAction = mapM_ print [1..10]
 funAction2 = do
     forM [1..10] print
     return ()
+
+-- IO actions are values like everything else.  Functions like putStrLn should
+-- not be thought of as performing an action with a value.  Rather, they take a
+-- value and return an IO action that is performed when it either falls into
+-- the main function or into a ghci prompt.
