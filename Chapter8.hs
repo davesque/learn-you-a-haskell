@@ -86,3 +86,87 @@ treeInsert x (Node a left right)
     | x == a = (Node a left right)
     | x < a  = Node a (treeInsert x left) right
     | x > a  = Node a left (treeInsert x right)
+
+treeElem :: (Ord a) => a -> Tree a -> Bool
+treeElem x EmptyTree = False
+treeElem x (Node a left right)
+    | x == a = True
+    | x < a  = treeElem x left
+    | x > a  = treeElem x right
+
+-- Implementation of Eq typeclass:
+-- class Eq a where
+--     (==) :: a -> a -> Bool
+--     (/=) :: a -> a -> Bool
+--     x == y = not (x /= y)
+--     x /= y = not (x == y)
+--
+-- Defining == and /= by mutual recursion (in terms of each other) allows the
+-- minimal completion definition for the typeclass to be smaller.  When
+-- defining an instance of this typeclass later on, we only have to explicitly
+-- define one of those functions.  The one left undefined will be evaluated in
+-- terms of the one that was defined.
+
+data TrafficLight = Red | Yellow | Green
+
+-- Create an instance of Eq.  Defining == alone is fine because of the
+-- recursive definition inside of the class.
+instance Eq TrafficLight where
+    Red == Red       = True
+    Yellow == Yellow = True
+    Green == Green   = True
+    _ == _           = False
+
+instance Show TrafficLight where
+    show Red    = "Red"
+    show Yellow = "Yellow"
+    show Green  = "Green"
+
+-- Implementation of the Maybe instance for the Eq typeclass:
+-- instance (Eq m) => Eq (Maybe m) where
+--     Just x == Just y   = (x == y)
+--     Nothing == Nothing = True
+--     _ == _             = False
+
+-- Implementation of Functor typeclass:
+-- class Functor f where
+--     fmap :: (a -> b) -> f a -> f b
+--
+-- Here, we see a single function signature defined: fmap.  Fmap takes a
+-- function which converts an `a` to a `b` and then takes an enclosing type or
+-- type constructor which contains an `a` and produces a type constructor which
+-- contains `b`.  So fmap takes an `a` to `b` converter function as well as a
+-- type constructor containing `a` and produces a type constructor containing
+-- `b`.  I just said that twice!!  So, in the most basic sense, any type
+-- constructor which is an instance of the Functor typeclass is something that
+-- contains things.  And it requires one function to be implemented which
+-- converts a container of one kind of thing into a container of another kind
+-- of thing.
+
+data MyMaybe a = MyNothing | MyJust a deriving (Show, Read, Eq)
+
+class MyFunctor f where
+    fmap' :: (a -> b) -> f a -> f b
+
+-- instance Functor Maybe where
+--     fmap _ Nothing = Nothing
+--     fmap f (Just x) = Just (f x)
+
+instance Functor Tree where
+    fmap f EmptyTree = EmptyTree
+    fmap f (Node x left right) = Node (f x) (fmap f left) (fmap f right)
+
+-- instance Functor (Either a) where
+--     fmap f (Right x) = Right (f x)
+--     fmap f (Left x) = Left x
+
+-- Kinds: kinds are sort of like the types of types.  typing :k Int in ghci
+-- will yield "Int :: *", which means that Int is a concrete type.  Anything
+-- that is a values (5, "Hello", takeWhile) must have a concrete type.  Typing
+-- :k Maybe will yield "Maybe :: * -> *", which means that Maybe is a type
+-- constructor that takes one concrete type and returns another concrete type.
+--
+-- Prelude> :k Maybe Int  -- Maybe Int is a concrete type
+-- Maybe Int :: *
+-- Prelude> :k Either     -- Either takes two concrete types and returns a concrete type
+-- Either :: * -> * -> *
