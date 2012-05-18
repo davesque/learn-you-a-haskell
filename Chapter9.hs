@@ -70,3 +70,8 @@ funAction2 = do
 -- not be thought of as performing an action with a value.  Rather, they take a
 -- value and return an IO action that is performed when it either falls into
 -- the main function or into a ghci prompt.
+
+foreverAction = forever $ do
+    putStrLn "Enter something:"
+    something <- getLine
+    putStrLn something
