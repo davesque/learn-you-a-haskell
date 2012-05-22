@@ -5,22 +5,36 @@ import System.IO
 import Data.List
 
 main = do
-    (command:argList) <- getArgs
+    args <- getArgs
+
+    let command = if length args > 0
+                  then Just $ head args
+                  else Nothing
+        argList = if length args > 0
+                  then Just $ tail args
+                  else Nothing
+
     dispatch command argList
 
-dispatch :: String -> [String] -> IO ()
-dispatch "add" = add
-dispatch "view" = view
-dispatch "remove" = remove
+dispatch :: Maybe String -> Maybe [String] -> IO ()
+dispatch (Just "add") = add
+dispatch (Just "view") = view
+dispatch (Just "remove") = remove
+dispatch _ = printUsage
 
-add :: [String] -> IO ()
-add [fileName, todoItem] = do
+printUsage :: Maybe [String] -> IO ()
+printUsage _ = do
+    putStrLn "Usage:"
+    putStrLn "todo add|view|remove filename [content|index]"
+
+add :: Maybe [String] -> IO ()
+add (Just [fileName, todoItem]) = do
     appendFile fileName (todoItem ++ "\n")
     putStrLn $ "Added item `" ++ todoItem ++ "`"
+add _ = printUsage Nothing
 
-view :: [String] -> IO ()
-view [] = return ()
-view [fileName] = do
+view :: Maybe [String] -> IO ()
+view (Just [fileName]) = do
     contents <- readFile fileName
 
     let todoTasks = lines contents
@@ -31,9 +45,10 @@ view [fileName] = do
     putStrLn "List contents:"
     putStr $ unlines numberedTasks
     putStr "\n"
+view _ = printUsage Nothing
 
-remove :: [String] -> IO ()
-remove [fileName, numberString] = do
+remove :: Maybe [String] -> IO ()
+remove (Just [fileName, numberString]) = do
     contents <- readFile fileName
 
     let todoTasks = lines contents
@@ -62,3 +77,4 @@ remove [fileName, numberString] = do
     putStrLn "New list contents:"
     putStr $ unlines numberedTasks
     putStr "\n"
+remove _ = printUsage Nothing

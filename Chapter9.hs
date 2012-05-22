@@ -38,8 +38,8 @@ myPutCharAction = do
         putChar c
         myPutCharAction
 
--- sequence takes a list of IO actions and returns a list of their results.
--- This list can then be bound to an identifier.
+-- sequence takes a list of IO actions and returns a list of their results. This
+-- list can then be bound to an identifier.
 mySequenceAction = do
     xs <- sequence [getLine, getLine, getLine]
     print xs
@@ -68,10 +68,18 @@ funAction2 = do
 
 -- IO actions are values like everything else.  Functions like putStrLn should
 -- not be thought of as performing an action with a value.  Rather, they take a
--- value and return an IO action that is performed when it either falls into
--- the main function or into a ghci prompt.
+-- value and return an IO action that is performed when it either falls into the
+-- main function or into a ghci prompt.
 
 foreverAction = forever $ do
     putStrLn "Enter something:"
     something <- getLine
     putStrLn something
+
+{- RANDOM NUMBERS -}
+
+-- Type signature of random library function:
+-- random :: (RandomGen g, Random a) => g -> (a, g)
+--
+-- This function takes a random generator (seed) as an argument and produces a
+-- random result along with another generator.
