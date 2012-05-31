@@ -162,7 +162,7 @@ instance Functor Tree where
 
 -- Kinds: kinds are sort of like the types of types.  typing :k Int in ghci
 -- will yield "Int :: *", which means that Int is a concrete type.  Anything
--- that is a values (5, "Hello", takeWhile) must have a concrete type.  Typing
+-- that is a value (5, "Hello", takeWhile) must have a concrete type.  Typing
 -- :k Maybe will yield "Maybe :: * -> *", which means that Maybe is a type
 -- constructor that takes one concrete type and returns another concrete type.
 --

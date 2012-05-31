@@ -1,0 +1,11 @@
+-- The `newtype` keyword is used to make types whose only function is to wrap
+-- another type.  So, even though it may contain exactly the same data, it will
+-- be considered a different type for the purposes of checking type integrity.
+-- Since it is only used for this one purpose, Haskell is able to optimize its
+-- usage, which makes it faster than just declaring another type with the `data`
+-- keyword.
+--
+-- Newtypes can only have one value constructor.  That value constructor can
+-- only takes one field as well.  Consider this newtype which wraps a boolean
+-- value:
+newtype CoolBool = CoolBool { getCoolBool :: Bool } deriving (Show)
