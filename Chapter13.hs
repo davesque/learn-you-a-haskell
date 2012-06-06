@@ -83,3 +83,15 @@ testLanding6 = do
 -- Do syntax looks like imperative programming, but it really just builds a
 -- sequential expression in which each new line depends on the value of the
 -- last one.
+--
+-- Lists are Monads too:
+-- equals [1,-1,2,-2]
+testList = [1,2] >>= \x -> [x,-x]
+-- equals [(1,'a'),(1,'b'),(2,'a'),(2,'b')]
+testList2 = [1,2] >>= \x -> (['a','b'] >>= \ch -> return (x,ch))
+testList3 = do
+    x <- [1,2]
+    ch <- ['a','b']
+    return (x,ch)
+-- List comprehensions are syntactic sugar for monad binding
+testList4 = [(x,ch) | x <- [1,2], ch <- ['a','b']]
