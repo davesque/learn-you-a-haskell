@@ -11,18 +11,21 @@ instance Monad Gang where
     (Gang x oldLog) >>= f = Gang y (oldLog ++ newLog)
         where (Gang y newLog) = f x
 
+-- instance Monad Writer where
+--     return x = writer (x, mempty)
+--
+--     (Writer oldMonoid x) >>= f = writer (y, oldMonoid ++ newMonoid)
+--         where (Writer newMonoid y) = f x
+
 logNumber :: Int -> Writer [String] Int
 logNumber x = writer (x, ["Got number: " ++ show x])
+
+multNumber :: Int -> Int -> Writer [String] Int
+multNumber x y = writer (x * y, ["Multiplying " ++ show y ++ " by " ++ show x])
 
 testLogNumber = do
     a <- logNumber 2
     b <- logNumber 3
-    return (a * b)
+    logNumber (a * b)
 
-data MultWriter m = MultWriter [String] m
-
-instance Monad MultWriter where
-    return x = MultWriter x
-
-    (MultWriter oldLog x) >>= f = MultWriter (oldLog ++ newLog) (x * y)
-        where (MultWriter newLog y) = f x
+testLogNumber2 = logNumber 2 >>= (\a -> logNumber 3 >>= (\b -> logNumber (a * b)))
