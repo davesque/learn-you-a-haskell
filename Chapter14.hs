@@ -29,3 +29,25 @@ testLogNumber = do
     logNumber (a * b)
 
 testLogNumber2 = logNumber 2 >>= (\a -> logNumber 3 >>= (\b -> logNumber (a * b)))
+
+testLogNumber3 = do
+    logNumber 2
+    logNumber 3
+    logNumber 4
+    tell ["Hello!"]
+
+testLogNumber4 = logNumber 2 >> logNumber 3 >> logNumber 4 >> tell ["Hello!"]
+
+type Stack = [Int]
+
+push :: Int -> Stack -> ((), Stack)
+push a xs = ((), a:xs)
+
+pop :: Stack -> (Int, Stack)
+pop (a:xs) = (a, xs)
+
+stackStuff :: Stack -> (Int, Stack)
+stackStuff stack = let
+    ((), newStack1) = push 3 stack
+    (a, newStack2)  = pop newStack1
+    in pop newStack2
