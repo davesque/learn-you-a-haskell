@@ -1,8 +1,3 @@
-import Control.Exception
-import Data.Char
-import System.IO
-import Data.List.Utils
-
 {-
  - A SubRip file is:
  - * A collection of sub rip entries
@@ -16,48 +11,57 @@ import Data.List.Utils
  - * Any number of lines of text ending with newline characters
  -}
 
+import Control.Exception
+import Data.Char
+import Data.List.Utils
+import System.Directory
+import System.Environment
+import System.IO
+import Text.Printf
 
 {-
- - Splits a list by a certain list element.
- -
- - Taken from: http://www.haskell.org/haskellwiki/Data.List.Split
+ - Data Types
  -}
--- A list splitted by an certain element is...
-splitOn :: Eq a => a -> [a] -> [[a]]
--- If an empty list was provided, a splitted list is an empty list.
-splitOn _ [] = []
--- If a list with one or more elements was provided...
-splitOn splitter list@(x:xs)
-    -- and the first element is the splitter, it's the rest of the list
-    -- splitted.
-    | splitter == x = splitOn splitter xs
-    -- otherwise, return the first part of the list broken over the splitter
-    -- consed onto the second half of the list after `splitOn` has been applied
-    -- to it.
-    | otherwise = let (firstPart,secondPart) = break (==splitter) list
-                  in firstPart:(splitOn splitter secondPart)
-
-slice :: Int -> Int -> [a] -> [a]
-slice from to = take (to - from + 1) . drop from
-
 type SubNumber = Int
 data SubTime = SubTime { hour :: Int
                        , minute :: Int
                        , second :: Float
-                       } deriving (Show)
+                       }
 type SubText = String
-
 data SubEntry = SubEntry { number :: SubNumber
                          , startTime :: SubTime
                          , endTime :: SubTime
                          , text :: SubText
-                         } deriving (Show)
+                         }
 
-testEntry = ["607"
-            ,"01:41:23,377 --> 01:41:27,871"
-            ,"<i>because I turned away"
-            ,"and didn 't watch them go.</i>"
-            ]
+{-
+ - Class Instances
+ -}
+instance Show SubTime where
+    show (SubTime hour minute second) =
+        fHour   ++ ":" ++
+        fMinute ++ ":" ++
+        replace "." "," fSecond
+        where fHour   = printf "%02d" hour
+              fMinute = printf "%02d" minute
+              fSecond = printf "%06.3f" second
+
+instance Show SubEntry where
+    show (SubEntry number startTime endTime text) =
+        fNumber ++ "\n" ++
+        fTime   ++ "\n" ++
+        text    ++ "\n"
+        where fNumber = show number
+              fTime   = show startTime ++ " --> " ++ show endTime
+
+slice :: Int -> Int -> [a] -> [a]
+slice from to = take (to - from + 1) . drop from
+
+strip :: (Eq a) => a -> [a] -> [a]
+strip _ [] = []
+strip x (y:ys)
+    | x == y    = strip x ys
+    | otherwise = y:strip x ys
 
 getSubNumber :: String -> SubNumber
 getSubNumber = read
@@ -80,15 +84,48 @@ getSubEntry xs = SubEntry number startTime endTime text
           endTime   = getSubTime $ times !! 1
           text      = getSubText $ drop 2 xs
 
---  entryFromStrings :: [String] -> SubEntry
---  entryFromStrings [rNumber:rTimes:rText] = SubEntry number startTime endTime text
---      where number = read rNumber
---            startTime = read r
+shiftSubTime :: Float -> SubTime -> SubTime
+shiftSubTime interval (SubTime hours minutes seconds) =
+    SubTime hours minutes (seconds + interval)
 
---  getEntries :: String -> [SubEntry]
---  getEntries s = 
---      where fLines = lines s
+shiftSubEntry :: Float -> SubEntry -> SubEntry
+shiftSubEntry interval (SubEntry number startTime endTime text) =
+    SubEntry number newStartTime newEndTime text
+    where newStartTime = shiftSubTime interval startTime
+          newEndTime   = shiftSubTime interval endTime
+
+shiftEntries :: Float -> String -> IO ()
+shiftEntries interval filename = do
+    contents <- readFile filename
+
+    let rawLines        = lines contents
+        cleanLines      = map (replace "\r" "") rawLines
+        rawLineGroups   = split [""] cleanLines
+        cleanLineGroups = strip [] rawLineGroups
+        entries         = map getSubEntry cleanLineGroups
+        newEntries      = map (shiftSubEntry interval) entries
+
+    bracketOnError (openTempFile "." "temp")
+        (\(tempName, tempHandle) -> do
+            hClose tempHandle
+            removeFile tempName)
+        (\(tempName, tempHandle) -> do
+            mapM_ (hPutStr tempHandle . show) newEntries
+            hClose tempHandle
+            removeFile filename
+            renameFile tempName filename)
+
+    putStrLn "Done!"
+
+printUsage :: IO ()
+printUsage = do
+    putStrLn "Usage:"
+    putStrLn "timeshifter interval filename"
+
+dispatch :: [String] -> IO ()
+dispatch (interval:filename:[]) = shiftEntries (read interval) filename
+dispatch _ = printUsage
 
 main = do
-    contents <- readFile "never_cry_wolf.srt"
-    putStr contents
+    args <- getArgs
+    dispatch args
