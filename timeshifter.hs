@@ -7,7 +7,7 @@
  -
  - A sub rip entry is:
  - * A number then a newline, then
- - * Two time stamps separated by '-->' then a newline, then
+ - * Two time stamps separated by ' --> ' then a newline, then
  - * Any number of lines of text ending with newline characters
  -}
 
@@ -54,6 +54,9 @@ instance Show SubEntry where
         where fNumber = show number
               fTime   = show startTime ++ " --> " ++ show endTime
 
+{-
+ - Utility Functions
+ -}
 slice :: Int -> Int -> [a] -> [a]
 slice from to = take (to - from + 1) . drop from
 
@@ -63,9 +66,9 @@ strip x (y:ys)
     | x == y    = strip x ys
     | otherwise = y:strip x ys
 
-getSubNumber :: String -> SubNumber
-getSubNumber = read
-
+{-
+ - Data Building/Muting Functions
+ -}
 getSubTime :: String -> SubTime
 getSubTime s = SubTime hours minutes seconds
     where items   = split ":" s
@@ -73,16 +76,13 @@ getSubTime s = SubTime hours minutes seconds
           minutes = read $ items !! 1
           seconds = read $ replace "," "." (items !! 2)
 
-getSubText :: [String] -> SubText
-getSubText = unlines
-
 getSubEntry :: [String] -> SubEntry
 getSubEntry xs = SubEntry number startTime endTime text
-    where number    = getSubNumber $ xs !! 0
+    where number    = read $ xs !! 0
           times     = split " --> " $ xs !! 1
           startTime = getSubTime $ times !! 0
           endTime   = getSubTime $ times !! 1
-          text      = getSubText $ drop 2 xs
+          text      = unlines $ drop 2 xs
 
 shiftSubTime :: Float -> SubTime -> SubTime
 shiftSubTime interval (SubTime hours minutes seconds) =
@@ -94,6 +94,9 @@ shiftSubEntry interval (SubEntry number startTime endTime text) =
     where newStartTime = shiftSubTime interval startTime
           newEndTime   = shiftSubTime interval endTime
 
+{-
+ - IO/Main
+ -}
 shiftEntries :: Float -> String -> IO ()
 shiftEntries interval filename = do
     contents <- readFile filename
