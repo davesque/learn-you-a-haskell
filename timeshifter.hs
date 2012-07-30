@@ -13,6 +13,7 @@
 
 import Control.Exception
 import Data.Char
+import Data.Fixed
 import Data.List.Utils
 import System.Directory
 import System.Environment
@@ -69,6 +70,9 @@ strip x (y:ys)
 {-
  - Data Building/Muting Functions
  -}
+getTotalSeconds :: SubTime -> Float
+getTotalSeconds (SubTime h m s) = fromIntegral h * 3600 + fromIntegral m * 60 + s
+
 getSubTime :: String -> SubTime
 getSubTime s = SubTime hours minutes seconds
     where items   = split ":" s
@@ -84,9 +88,17 @@ getSubEntry xs = SubEntry number startTime endTime text
           endTime   = getSubTime $ times !! 1
           text      = unlines $ drop 2 xs
 
+--  shiftSubTime :: Float -> SubTime -> SubTime
+--  shiftSubTime interval (SubTime hours minutes seconds) =
+--      SubTime hours minutes (seconds + interval)
+
 shiftSubTime :: Float -> SubTime -> SubTime
-shiftSubTime interval (SubTime hours minutes seconds) =
-    SubTime hours minutes (seconds + interval)
+shiftSubTime interval entry =
+    SubTime newHours newMinutes newSeconds
+    where newTotalSeconds = max 0 (getTotalSeconds entry + interval)
+          newHours        = floor $ newTotalSeconds / 3600
+          newMinutes      = floor $ (newTotalSeconds `mod'` 3600) / 60
+          newSeconds      = newTotalSeconds `mod'` 60
 
 shiftSubEntry :: Float -> SubEntry -> SubEntry
 shiftSubEntry interval (SubEntry number startTime endTime text) =
