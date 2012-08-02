@@ -1,3 +1,5 @@
+import Data.List
+
 {-
  - Splits a list by a certain list element.
  -
@@ -17,3 +19,17 @@ splitOn splitter list@(x:xs)
     -- to it.
     | otherwise = let (firstPart,secondPart) = break (==splitter) list
                   in firstPart:(splitOn splitter secondPart)
+
+compress :: (Eq a) => [a] -> [a]
+compress [] = []
+compress [x] = [x]
+compress (x:xs)
+    | x == head xs = compress xs
+    | otherwise    = x:compress xs
+
+compress' :: (Eq a) => [a] -> [a]
+compress' [] = []
+compress' (x:xs) = reverse $ foldl (\acc x -> if x == head acc then acc else x:acc) [x] xs
+
+compress'' :: (Eq a) => [a] -> [a]
+compress'' = (map head) . group
